@@ -40,7 +40,5 @@ public class CircuitBreakerService {
                 });
 
         return result.get();
-
-
     }
 }
