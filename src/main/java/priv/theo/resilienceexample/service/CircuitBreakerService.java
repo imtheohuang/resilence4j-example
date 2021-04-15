@@ -7,6 +7,7 @@ import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import priv.theo.resilienceexample.bean.Product;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,13 +23,16 @@ public class CircuitBreakerService {
     @Autowired
     private RemoteService remoteService;
 
-    public List<String> circuitBreakerWithoutAop() {
+    public List<Product> circuitBreakerWithoutAop() {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("backendA");
 
+        log.info("circuitBreaker: {}", System.identityHashCode(circuitBreaker));
 
-        Supplier<List<String>> listSupplier = circuitBreaker.decorateSupplier(remoteService::listUser);
+        Supplier<List<Product>> listSupplier = circuitBreaker.decorateSupplier(remoteService::searchProduct);
 
-        Try<List<String>> result = Try.ofSupplier(listSupplier)
+        // List<Product> products = listSupplier.get();
+
+        Try<List<Product>> result = Try.ofSupplier(listSupplier)
                 .recover(CallNotPermittedException.class, e -> {
                     log.info("circuit breaker open!");
                     return Collections.emptyList();
